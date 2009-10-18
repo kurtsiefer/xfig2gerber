@@ -1,0 +1,54 @@
+#summary Two examples of converted figure files
+
+= Two-layer example =
+The original xfig file (`pd_new.fig`) represents a simple photodiode holder with a battery connection and a BNC connector. The original can be found in the subversion repository in the `svn/examples/2layer` tree.
+
+The manufacturing files were created with the command
+{{{
+xfig2gerber -D -o photodiode pd_new.fig
+}}}
+
+The image below shows the output of the gerbv program when invoked with 
+{{{
+gerbv photodiode*`
+}}}
+The light green circles represen the `holes.drl` file content, the light purple the `*.compsilk.lgx` top solder mask openings, and the dark purple lines connextions on the top side.
+http://xfig2gerber.googlecode.com/svn/examples/2layer/photodiode_gerbview_output.png
+
+= Four layer board = 
+A more complex example is found in the ``svn/examples/4layer` tree. The original xfig file (`miniusb.fig`) represents a four-layer board of a EZ-USB adapter with a few external components. All Gerber files can be found in the example directory as well; visit it via the browse tab in this wiki.
+
+The manufacturing files were created with 
+{{{
+xfig2gerber -F -X -i -o usbasapt miniusb.fig
+}}}
+
+We show four images, again obtained with gerbview:
+
+First, the top side; shown are the hole layers (orange), the silk screen (light green), the solder mask (purple) and the top copper layer (turquoise):
+
+http://xfig2gerber.googlecode.com/svn/examples/4layer/topside.png
+
+
+Then, the bottom side with copper (brown), soldermask (purple) and holes (orange):
+
+http://xfig2gerber.googlecode.com/svn/examples/4layer/bottimside.png
+
+
+The topside inner layer is connected to ground. Note the large free openings for some vias due to the `-i` option. Besides the copper layer, the holes (orange) are shown for orientation:
+
+http://xfig2gerber.googlecode.com/svn/examples/4layer/topinner.png
+
+
+The bottomside inner layer is connected to +3.3V. Besides the copper layer, the holes (orange) are shown for orientation:
+
+http://xfig2gerber.googlecode.com/svn/examples/4layer/bottinner.png
+
+
+There is also a stencil mask generated with the command
+{{{
+xfig2gerber -r 2 -n 20 -o u miniusb.fig
+}}}
+This is a trick to only extract the xfig layer 20, circumventing the knockout layer mechanism. The `gerbv` look at it reveals a pattern suitable for solder paste stencil generation:
+
+http://xfig2gerber.googlecode.com/svn/examples/4layer/stencil.png
