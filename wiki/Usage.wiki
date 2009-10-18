@@ -59,53 +59,53 @@ Here are some simple examples of file generation; we assume that the xfig file i
 == Simple two-layer board ==
 We assume we want the cheapest version of manufacturing files without solder mask and silk screen. We also want the output file names not having the `.fig' extension in the name as well, so we use the -o option. The invocation code would be 
 {{{
-~/programs/xfig2gerber/xfig2gerber -d somecircuit.fig -o somecircuit somecircuit.fig
+~/programs/xfig2gerber/xfig2gerber -d -o somecircuit somecircuit.fig
 }}}
 This generates the following files:
- * '''somecircuit.comp.lgx''', the RS274D file for the component side
- * '''somecircuit.bott.lgx''', the RS274D file for the bottom side
- * '''somecircuit.holes.ldrl''', the Excellon drill file for the through hole coordinates
- * '''somecircuit.tools.mfg''', an overview which drill at what diameter was used how many times. 
+ * *somecircuit.comp.lgx*, the RS274D file for the component side
+ * *somecircuit.bott.lgx*, the RS274D file for the bottom side
+ * *somecircuit.holes.ldrl*, the Excellon drill file for the through hole coordinates
+ * *somecircuit.tools.mfg*, an overview which drill at what diameter was used how many times. 
 
 == Fancier two layer board ==
 Additionally to the copper layers, we also want to have solder masks on both sides and a and component side silk screen. The command invocation is
 {{{
-~/programs/xfig2gerber/xfig2gerber -D somecircuit.fig -o somecircuit somecircuit.fig
+~/programs/xfig2gerber/xfig2gerber -D -o somecircuit somecircuit.fig
 }}}
 The `-D` option instead of the `d` ensures that the following additional files are generated:
- * '''somecircuit.compsldmask.lgx''', the RS274D file for the component side solder mask
- * '''somecircuit.bottsldmask.lgx''', the RS274D file for the bottom side solder mask
- * '''somecircuit.compsilk.lgx''', the RS274D file for the component side silk screen
+ * *somecircuit.compsldmask.lgx*, the RS274D file for the component side solder mask
+ * *somecircuit.bottsldmask.lgx*, the RS274D file for the bottom side solder mask
+ * *somecircuit.compsilk.lgx*, the RS274D file for the component side silk screen
 
 == Four layer board ==
 Additionally to the four metal layers, we want top and bottom solder masks, and a top side silk screen layer. If vias have to go through inner layers, this requires the 274X format with its knockout layer feature. The invocation is done via
 {{{
-~/programs/xfig2gerber/xfig2gerber -F -X -i somecircuit.fig -o somecircuit somecircuit.fig
+~/programs/xfig2gerber/xfig2gerber -F -X -i -o somecircuit somecircuit.fig
 }}}
-Here, the `-F' option generates the standard layer files, and the `-X` option allows for the knockout feature in the RS274X format. The additional `-i` option is used to fulfil a certain minimum distance between inner layers and vias which they are not supposed to be connected to. This was an option introduced due to some manufacturer requirements at some point.
+Here, the `-F` option generates the standard layer files, and the `-X` option allows for the knockout feature in the RS274X format. The additional `-i` option is used to fulfil a certain minimum distance between inner layers and vias which they are not supposed to be connected to. This was an option introduced due to some manufacturer requirements at some point.
 
 The files generated after this invocation are:
- * '''somecircuit.comp.lgx''', the RS274X file for the component side
- * '''somecircuit.bott.lgx''', the RS274X file for the bottom side
- * '''somecircuit.holes.drl''', the Excellon drill file for the through hole coordinates
- * '''somecircuit.tools.mfg''', an overview which drill at what diameter was used how many times. 
- * '''somecircuit.compsldmask.lgx''', the RS274X file for the component side solder mask
- * '''somecircuit.bottsldmask.lgx''', the RS274X file for the bottom side solder mask
- * '''somecircuit.compsilk.lgx''', the RS274X file for the component side silk screen
- * '''somecircuit.compinner.lgx''', the RS274X file for the inner layer close to the component side
- * '''somecircuit.bottinner.lgx''', the RS274X file for the inner layer close to the bottom side
+ * *somecircuit.comp.lgx*, the RS274X file for the component side
+ * *somecircuit.bott.lgx*, the RS274X file for the bottom side
+ * *somecircuit.holes.drl*, the Excellon drill file for the through hole coordinates
+ * *somecircuit.tools.mfg*, an overview which drill at what diameter was used how many times. 
+ * *somecircuit.compsldmask.lgx*, the RS274X file for the component side solder mask
+ * *somecircuit.bottsldmask.lgx*, the RS274X file for the bottom side solder mask
+ * *somecircuit.compsilk.lgx*, the RS274X file for the component side silk screen
+ * *somecircuit.compinner.lgx*, the RS274X file for the inner layer close to the component side
+ * *somecircuit.bottinner.lgx*, the RS274X file for the inner layer close to the bottom side
 
 
 == Extraction of an additional inner layer ==
-Stil not sure if the knockout layer is handled in a correct way or if there is an additional option needed for this. The canonical invocation to get layers 100-119 into a single inner layer gerber file (with knockouts from other layers) should be (not tested yet):
+Still not sure if the knockout layer is handled in a correct way or if there is an additional option needed for this. The canonical invocation to get layers 100-119 into a single inner layer gerber file (with knockouts from other layers) should be (not tested yet):
 {{{
-~/programs/xfig2gerber/xfig2gerber -n 100 -X -i somecircuit.fig -o somecircuit somecircuit.fig
+~/programs/xfig2gerber/xfig2gerber -n 100 -X -i -o somecircuit somecircuit.fig
 }}}
-This generates a single RS274X file with the name 'somecircuit.arb.lgx' and needs to be renamed into something sensible if more than one additional layer needs to be generated.
+This generates a single RS274X file with the name `somecircuit.arb.lgx` and needs to be renamed into something sensible if more than one additional layer needs to be generated.
 
 == Extraction of a stencil mask ==
-This is sort of a cheap trick to generate a stencil mask for the exposed pads for surface mount devices. It assumes that only layer 21 in the basic xfig layer is relevant for that, since this is the layer which contains all the pads with openings in the component side solder masks:
+This is sort of a dirty trick to generate a stencil mask for the exposed pads for surface mount devices. It assumes that only layer 21 in the basic xfig layer is relevant for that, since this is the layer which contains all the pads with openings in the component side solder masks:
 {{{
-~/programs/xfig2gerber/xfig2gerber -r 1 -n 21 -T -i somecircuit.fig -o somecircuit somecircuit.fig
+~/programs/xfig2gerber/xfig2gerber -r 2 -n 20 -T -i -o somecircuit somecircuit.fig
 }}}
-The file generated is named  'somecircuit.arb.lgx'. The options `-r` and `-n` are used to isolate layer 21, and the option `-T` disables the  transfer of whatever is on layer 15 to this layer; usually this refers to vias and the like. The file has no knockout layer, and conforms hopefully to the RS274D standard.
+The file generated is named  `somecircuit.arb.lgx`. The options `-r` and `-n` are used to isolate layer 21, and the option `-T` disables the  transfer of whatever is on layer 15 to this layer; usually this refers to vias and the like. The file has no knockout layer, and conforms hopefully to the RS274D standard.
