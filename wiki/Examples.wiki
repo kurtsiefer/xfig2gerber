@@ -49,6 +49,6 @@ There is also a stencil mask generated with the command
 {{{
 xfig2gerber -r 2 -n 20 -o u miniusb.fig
 }}}
-This is a trick to only extract the xfig layer 20, circumventing the knockout layer mechanism. The `gerbv` look at it reveals a pattern suitable for solder paste stencil generation:
+This is a trick to only extract the xfig layer 21 (the one containing the SMD pads), circumventing the knockout layer mechanism. The `gerbv` look at it reveals a pattern suitable for solder paste stencil generation:
 
 http://xfig2gerber.googlecode.com/svn/examples/4layer/stencil.png
