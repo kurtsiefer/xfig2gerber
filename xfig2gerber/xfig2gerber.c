@@ -241,7 +241,7 @@ roundap_table  rnd_apt_tab[] =
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 40
+#define num_rect_apert 44
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -284,9 +284,12 @@ rectap_table rectap_tab[]=
  {162, 324, 148, 0.072, 0.036, "minicirc MAR pad 36x72mil"}, 
  {315, 45, 152, 0.010, 0.070, "LQFP128 pad (19.7 mil sep) 10x70mil"},
  {45, 315, 153, 0.070, 0.010, "LQFP128 pad (19.7 mil sep) 70x10mil"},
- {64, 223, 154, 0.040, 0.010, "TSSOP pad 50x14mil"},
- {223, 64, 155, 0.010, 0.040, "TSSOP pad 14x50mil"}, /* 40 */
-
+ {64, 223, 154, 0.050, 0.014, "TSSOP pad 50x14mil"},
+ {223, 64, 155, 0.014, 0.050, "TSSOP pad 14x50mil"}, /* 40 */
+ {450, 720, 156, 0.160, 0.100, "SOT-223 ground pad 160x100mil"},
+ {720, 450, 157, 0.100, 0.160, "SOT-223 ground pad 100x160mil"},
+ {270, 225, 158, 0.050, 0.060, "SMD Varicap pad 50x60mil"},
+ {225, 270, 159, 0.060, 0.050, "SMD Varicap pad 60x50mil"},
 };
 
 /* predefined layer lists */
