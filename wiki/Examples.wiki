@@ -12,11 +12,12 @@ The image below shows the output of the gerbv program when invoked with
 {{{
 gerbv photodiode*`
 }}}
-The light green circles represen the `holes.drl` file content, the light purple the `*.compsilk.lgx` top solder mask openings, and the dark purple lines connextions on the top side.
+The light green circles represent the `holes.drl` file content, the light purple the `*.compsilk.lgx` top solder mask openings, and the dark purple lines connections on the top side.
+
 http://xfig2gerber.googlecode.com/svn/examples/2layer/photodiode_gerbview_output.png
 
-= Four layer board = 
-A more complex example is found in the ``svn/examples/4layer` tree. The original xfig file (`miniusb.fig`) represents a four-layer board of a EZ-USB adapter with a few external components. All Gerber files can be found in the example directory as well; visit it via the browse tab in this wiki.
+= Four layer board example = 
+A more complex example is found in the ``svn/examples/4layer` tree. The original xfig file (`miniusb.fig`) represents a four-layer board of a EZ-USB adapter with a few external components. All Gerber files can be found in the example directory as well; visit it via the browse tab in this wiki. (Side comment: This board has a bug, the data/clock lines for the serial EEPROM are interchanged)
 
 The manufacturing files were created with 
 {{{
