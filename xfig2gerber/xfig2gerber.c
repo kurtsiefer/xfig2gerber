@@ -212,7 +212,7 @@ int tool_counts[tool_number+1];    /* counts number of tool usages */
 
 
 /* here, some special aperture definitions are given */
-#define num_round_apert 16 /* round patches identified as apertures */
+#define num_round_apert 17 /* round patches identified as apertures */
 /* the round apertures have a corresponding aperture index for the
    insulation pattern to be used for non-touched inner layers. This assumes
    a minimum distance of 16 mil between the hole and the next copper. This
@@ -237,11 +237,12 @@ roundap_table  rnd_apt_tab[] =
  {142, 142, 0.063, "small round pad, 63 mil dia", 142},
  {106, 149, 0.047, "inner insulation pad, 47mil dia", 149},
  {119, 150, 0.053, "inner insulation pad, 53 mil dia", 150},
- {151, 151, 0.067, "inner insulation pad, 67 mil dia", 151}
+ {151, 151, 0.067, "inner insulation pad, 67 mil dia", 151},
+ {315, 170, 0.140, "BNC plug solder pad, 140 mil dia", 170} 
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 44
+#define num_rect_apert 54
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -290,6 +291,16 @@ rectap_table rectap_tab[]=
  {720, 450, 157, 0.100, 0.160, "SOT-223 ground pad 100x160mil"},
  {270, 225, 158, 0.050, 0.060, "SMD Varicap pad 50x60mil"},
  {225, 270, 159, 0.060, 0.050, "SMD Varicap pad 60x50mil"},
+ {216, 162, 160, 0.036, 0.048, "SOD-123 pad, 36x48mil"}, /* 45 */
+ {162, 216, 161, 0.048, 0.036, "SOD-123 pad, 48x36mil"},
+ {315, 540, 162, 0.120, 0.070, "D2pak pad, 120x70mil"},
+ {540, 315, 163, 0.070, 0.120, "D2pak pad, 70x120mil"},
+ {765, 900, 164, 0.200, 0.170, "D2pak back, 200x170mil"},
+ {900, 765, 165, 0.170, 0.200, "D2pak back, 170x200mil"}, /* 50 */
+ {450, 1350, 166, 0.300, 0.100, "Inductor S size, 300x100mil"},
+ {1350, 450, 167, 0.100, 0.300, "Inductor S size, 100x300mil"},
+ {495, 2250, 168, 0.500, 0.110, "Inductor XL size, 500x110mil"},
+ {2250, 495, 169, 0.110, 0.500, "Inductor XL size, 110x500mil"}
 };
 
 /* predefined layer lists */
