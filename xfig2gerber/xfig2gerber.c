@@ -242,7 +242,7 @@ roundap_table  rnd_apt_tab[] =
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 54
+#define num_rect_apert 60
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -300,7 +300,13 @@ rectap_table rectap_tab[]=
  {450, 1350, 166, 0.300, 0.100, "Inductor S size, 300x100mil"},
  {1350, 450, 167, 0.100, 0.300, "Inductor S size, 100x300mil"},
  {495, 2250, 168, 0.500, 0.110, "Inductor XL size, 500x110mil"},
- {2250, 495, 169, 0.110, 0.500, "Inductor XL size, 110x500mil"}
+ {2250, 495, 169, 0.110, 0.500, "Inductor XL size, 110x500mil"},
+ {72, 360, 171, 0.080, 0.016, "MFQP44 pad, 80x16mil"}, /* 55 */
+ {360, 72, 172, 0.016, 0.080, "MFQP44 pad, 16x80mil"},
+ {129, 211, 173, 0.047, 0.029, "SOT23-5a pad, 47x29mil"},
+ {211, 129, 174, 0.029, 0.047, "SOT23-5a pad, 29x47mil"},
+ {180, 450, 175, 0.100, 0.040, "1008 coilcraft pad 100x40mil"},
+ {450, 180, 176, 0.040, 0.100, "1008 coilcraft pad 40x100mil"}, /* 60 */
 };
 
 /* predefined layer lists */
