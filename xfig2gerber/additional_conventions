@@ -1,0 +1,10 @@
+conventions to handle documentation layers and stencil generation in a
+consistent way:
+
+layer 4 (red or magenta) is used for component indices
+layer 7 (red) is used for side ruler 
+layer 21 is component pads which go to solder mask, and stencil mask
+layer 22 are solder pads that do not contribute to component identification
+but go to the stencil mask
+layer 23 contribute not to stencil mask but to solder mask layer
+
