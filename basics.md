@@ -1,0 +1,66 @@
+The purpose of this code/library package is to allow artwork drawn in xfig to be converted into manufacturing files for PCB makers. The manufacturer I contacted so far required the following files:
+  1. All artwork in metallized layers in a RS274 (aka Gerber code) format
+  1. RS274 files with layers for solder mask coatings; this is the coating covering the  outer metal layers except the soldering pads
+  1. RS274 files for a silk screen; this is the text/comment layer used for documenting chip orientations fucntional groups and other stuff
+  1. Drill files in an 'Excellon' format; this is a format similar but not identical to RS274 and acts as the CNC file for drilling holes into the PCB;
+  1. Optionally a tool specification file. Not sure how common the need for this file is, but one of our manufacturer required it to find out how many holes were to be drilled of which size.
+
+# Mapping of xfig artwork to Gerber files #
+Not dissimilar to the xfig file format itself, the Gerber format is a vectorized description of the grahical pattern, but historically with a photoplotter as an output device in mind. The basic translation from xfig is thus reasonably straightfowrard. Only a few xfig primitives are actually implemented, which map well onto the gerber primitives and are usually sufficient for PCB design. These are currently:
+  * filled polygons and lines
+  * rectangular objects (filled and not filled)
+  * circles (filled and not filled)
+  * arcs (not filled)
+Text entries are specifically not implemented, but may be later if there is an obvious vectorization of fonts possible. Fillings are supposed to take place without fancy filling fractions or patterns.
+
+## Scaling ##
+The first thing to keep in mind when using xfig together with this package is the scaling factor between xfig and the desired physical structure. Traditionaly the most commonly encountered pitch of repetitive structures in PCB design is 100 mil (0.1 inch or 2.54mm), with reasonably high likelihood of raster requirements of 50 mil e.g. for traces between chip connections or for SOIC chip sizes. To use the snap-to-grid functions of xfig in an advangtageous way for that, the metric drawing system was chosen for its decimal segmentation of the basic unit, and translated into the common 100 mil raster. Thus, a demagnification of the xfig artwork to 25.4% is necessary to arrive at the physical hardware size.
+So, for the translator program, the encoded demagnification is **25.4%**, translating something with a size of 1cm in xfig into something with a size of 100 mil in the gerber code.
+
+## Apertures ##
+Differently from xfig, there is the concept of apertures, graphical primitives which are either used for drawing lines, or for generating repetitive simple patterns. Often these apertures are identified with connection points for electronic testing routines. The
+translation program tries to extract such structures from the original xfig code. This, however, can only take place for a few known primitives, which are used in the libraries and hardcoded into the conversion program, and identified by their sizes (in internal xfig units).
+
+## Layers ##
+While the layer structure in xfig seems to suggest a straightforward mapping into the various gerber file layers, this is not the most practical approach, since several structures end up in a number of layers, and a repetiton of structures within xfig just for them to show up e.g. on both metallized layers and the solder stop mask layers for vias woud be inefficient. Thus, a more complex layer specification in xfig seemed appropriate, where xfig layers contribute to a set of target layers. Also, in multilayer boards it is necessary to have some separation between the metal surface a via connecting
+to another plane, resulting in shorts e.g. between a ground and another supply plane. This is solved natively in an efficient way with the Gerber code knockout possibility (in the RS274X extension of the file definition), where material can be removed from existing structures. In xfig, this is not natively implemented, so this feature had to be mapped onto the choice of layers.
+
+### Manufacturing layers ###
+The definition of the xfig layers is inspired by the needs for two- or four layer boards, with a natural extension to more layers. The expected full layer set (together with its default file extensions in the conversion process are):
+
+| **What** | **file extension** |
+|:---------|:-------------------|
+| component side silk screen | `*.compsilk.lgx` |
+| component side solder mask | `*.compsldmask.lgx` |
+| component side outer copper layer | `*.comp.lgx`|
+| inner copper layer close to component side | `*.cmpinner.lgx` |
+| inner copper layer close to _solder_ side | `*.bottinner.lgx` |
+| bottom or solder side copper layer | `*.bott.lgx` |
+| bottom side solder mask | `*.bottsldmask.lgx` |
+| bottom side silk screen | `*.bottsilk.lgx` |
+
+## Xfig layer interpretation ##
+The functional assignment of which xfig layer leads to what manufacturing layer is described in the following overview. To allow for an easy visual parsing, there are recommended colorings for different functional layers, but the conversion program (by now) ignores this. However, it is strongly recommended to stick to this or an equivalent coloring scheme to work efficiently.
+
+The layers are:
+
+|layer 00| contains hole information as white circles|
+|:-------|:------------------------------------------|
+|layer 02| contains comment info. not transferred to silk screen |
+|layer 03|as layer 02 |
+|layer 04|as layer 02 |
+|layer 06|silk screen layer, component side|
+|layer 07|silk screen layer, solder side|
+|layer 08|additional solder mask, component side|
+|layer 09|additional solder mask, solder side|
+|layer 10|contains patterns which go on both external planes, but no internal planes. Color code is black (recommended) insulated from inner layers. |
+|layer 11|as layer 10, but will not go to top solder mask. Idea is to create covered vias. Color code is  dark grey (recommended). insulated from inners. |
+|layer 12|contains patterns which go on both external planes, and comp inner;insulated from bott inner layer.  Color code is magenta4 (recommended)|
+|layer 13|contains patterns which go on both external planes, and bott inner;insulated from comp inner layer. Color code is cyan4 (recommended)|
+|layer 15|contains patterns which are transferred to all metalized planes; pads go to top solder mask. Color code is brown2.|
+|layer 16|same as layer 15, but pads are not transferred to solder side mask. good for covered vias. Color code is brown4.|
+|layer 20-39|component layer. Pads on layer 21-34 will be transferred to the top solder mask, layers 35-39 will not. Color code is white for 20, blue for 21-34 and blue3 for 35-39.<br>layer 20 is the knockout layer for removing copper.<br>
+<tr><td>layer 40-59</td><td>inner layer close to component layer. Color code is white for 40 and magenta for 41-59.</td></tr>
+<tr><td>layer 60-79</td><td>inner layer close to solder layer. Color code is white for 60 and cyan for 61-79</td></tr>
+<tr><td>layer 80-99</td><td> solder layer. Pads on 81-94 will be transferred to solder side solder mask, pads on layer 95-99 will not. Color code is white for 80, green for 81-94, and green3 for 95-99. layer 80 is knockout layer for removing copper.</td></tr>
+<tr><td>layers 100- </td><td> may contain arbitrary more inner layers. Suggested layer spacing is 20 xfig layers per physical layer. The first layer is always the knockout layer and should be colored white.</td></tr>
