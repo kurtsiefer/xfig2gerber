@@ -2,7 +2,8 @@
    pcb generation from a xfig file. 
 
 
- Copyright (C) 1998-2009 Christian Kurtsiefer, <christian.kurtsiefer@gmail.com>
+ Copyright (C) 1998-2009, 2019 Christian Kurtsiefer,
+                         <christian.kurtsiefer@gmail.com>
 
  This source code is free software; you can redistribute it and/or
  modify it under the terms of the GNU Public License as published
@@ -74,6 +75,10 @@
              transferred to the top solder mask, layers 35-39 will not.
 	     color code is white for 20, blue for 21-34 and blue3 for 35-39.
 	     layer 20 is the knockout layer for removing copper.
+             Convention: layer 21-22 go on stenicl mask, layer 23 does not.
+             Layer 34 will NOT be transferred to the copper, only solder mask;
+	     this is for solder-mask defined solder pads for BGAs. suggested
+	     color for layer 34 is light blue.
    layer 40-59: inner layer close to component layer.
              Color code is white for 40 and magenta for 41-59.
    layer 60-79: inner layer close to solder layer.
@@ -174,6 +179,8 @@
    added larger inner insulation pads for local manuf   chk 11.8.07
    added basic arc functionality - needs filled arcs still chk27.5.08
    removed doubling of hole data, fixed buggy layer 16 assoc 17.10.09chk
+   added some pads and drills for csBGA cases; changed meaning of layers
+     34 and 94 to be excluded for copper, but included for sld mask 5/2019chk
 */
 
 #include<stdio.h>
@@ -189,8 +196,8 @@
    translate in the same tool. Therefore, the supported table has two indices:
    a drill number or virtual diameters, and a tool index (starting at 1) for
    the physical drill. */
-#define drill_number 13
-#define tool_number 12
+#define drill_number 15
+#define tool_number 14
 typedef struct {float diameter; int graph_units, tool_index; } drill_table;
 drill_table drilltab[]={
   {0.028,65,1},                              /* #70, .028" = 0.711mm */
@@ -206,13 +213,15 @@ drill_table drilltab[]={
   {0.0145, 31,10},  /* for tiniest vias */   /* #79, .0145" = 0.368mm */
   {0.021, 45,11},   /* for small vias */     /* #75, .021" = 0.533mm */
   {0.177, 392,12},  /* for M4/8-32 screws */ /* #16, 0.177" = 4.496mm */
+  {0.0083, 19, 13},  /* for tinier via */    /* #91, 0.0083" = 0.214mm */
+  {0.011, 25, 14},   /* tiny vias */         /* #85, 0.011" = 0.279mm */
 };
 
 int tool_counts[tool_number+1];    /* counts number of tool usages */
 
 
 /* here, some special aperture definitions are given */
-#define num_round_apert 17 /* round patches identified as apertures */
+#define num_round_apert 21 /* round patches identified as apertures */
 /* the round apertures have a corresponding aperture index for the
    insulation pattern to be used for non-touched inner layers. This assumes
    a minimum distance of 16 mil between the hole and the next copper. This
@@ -222,27 +231,31 @@ typedef struct {
     int xfig_rad, aperture_idx; double real_dia;  /* in inches */
     char * description; int knockout_idx; } roundap_table;
 roundap_table  rnd_apt_tab[] = 
-{{135, 102, 0.060, "standard round pad", 151},
- {125, 103, 0.055, "small round pad", 102},
- {101, 108, 0.045, "small round pad, 45 mil dia", 102},
- {99, 109, 0.044, "small round pad, 44 mil dia", 102},
- {95, 110, 0.042, "small round pad, 42 mil dia", 102},
- {83, 128, 0.037, "via pad, 37 mil dia", 150},
- {70, 129, 0.031, "via pad, 31 mil dia", 149},
- {180, 133, 0.080, "medium round pad, 80 mil dia", 133},
- {225, 134, 0.100, "medium round pad, 100 mil dia", 134},
- {360, 135, 0.160, "large round pad, 160 mil dia", 135},
- {405, 136, 0.180, "large round pad, 180 mil dia", 136},
- {270, 141, 0.120, "medium round pad, 120 mil dia", 141},
- {142, 142, 0.063, "small round pad, 63 mil dia", 142},
- {106, 149, 0.047, "inner insulation pad, 47mil dia", 149},
- {119, 150, 0.053, "inner insulation pad, 53 mil dia", 150},
- {151, 151, 0.067, "inner insulation pad, 67 mil dia", 151},
- {315, 170, 0.140, "BNC plug solder pad, 140 mil dia", 170} 
+    {{135, 102, 0.060, "standard round pad", 151}, /* 0 */
+     {125, 103, 0.055, "small round pad", 102},
+     {101, 108, 0.045, "small round pad, 45 mil dia", 102},
+     {99, 109, 0.044, "small round pad, 44 mil dia", 102},
+     {95, 110, 0.042, "small round pad, 42 mil dia", 102},
+     {83, 128, 0.037, "via pad, 37 mil dia", 150},
+     {70, 129, 0.031, "via pad, 31 mil dia", 149},
+     {180, 133, 0.080, "medium round pad, 80 mil dia", 133},
+     {225, 134, 0.100, "medium round pad, 100 mil dia", 134},
+     {360, 135, 0.160, "large round pad, 160 mil dia", 135},
+     {405, 136, 0.180, "large round pad, 180 mil dia", 136}, /* 10 */
+     {270, 141, 0.120, "medium round pad, 120 mil dia", 141},
+     {142, 142, 0.063, "small round pad, 63 mil dia", 142},
+     {106, 149, 0.047, "inner insulation pad, 47mil dia", 149},
+     {119, 150, 0.053, "inner insulation pad, 53 mil dia", 150},
+     {151, 151, 0.067, "inner insulation pad, 67 mil dia", 151}, /* 15 */
+     {315, 170, 0.140, "BNC plug solder pad, 140 mil dia", 170},
+     {35, 187, 0.0156, "tiny via pad, 15.6 mil dia", 149},
+     {20, 188, 0.0089, "csBGA pad 0.226mm (8.9 mil) dia", 189},
+     {27, 189, 0.012, "BGA pad / csBGA knockout pad, 12mil dia", 194},
+     {36, 194, 0.016, "BGA knockout pad 16 mil dia", 194}, /* 20 */
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 70
+#define num_rect_apert 74
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -311,12 +324,16 @@ rectap_table rectap_tab[]=
  {196, 248, 178, 0.055, 0.044, "SMD crystal pad 55.1x43.5mil"},
  {64, 225, 179, 0.050, 0.014, "TSSOP pad2 50x14mil"},
  {225, 64, 180, 0.014, 0.050, "TSSOP pad2 14x50mil"},
- {72, 225, 181, 0.050, 0.016, "uusb pad 50x16mil"},
+ {72, 225, 181, 0.050, 0.016, "uusb pad 50x16mil"}, /* 65 */
  {225, 72, 182, 0.016, 0.050, "uusb pad 16x50mil"},
  {315, 360, 183, 0.080, 0.070, "uusb pad2 80x70mil"},
  {360, 315, 184, 0.070, 0.080, "uusb pad2 70x80mil"},
  {135, 225, 185, 0.050, 0.030, "AT1532 pad 50x30mil"},
- {225, 135, 186, 0.030, 0.050, "AT1532 pad 30x50mil"},
+ {225, 135, 186, 0.030, 0.050, "AT1532 pad 30x50mil"}, /* 70 */
+ {54, 124, 190, 0.0276, 0.012, "USB-3 connector pad 27.6x12mil"},
+ {124, 54, 191, 0.012, 0.0276, "USB-3 connector pad 12x27.6mil"},
+ {124, 178, 192, 0.0396, 0.0276, "USB-3 connector pad 39.6x27.6mil"},
+ {178, 124, 193, 0.0276, 0.0396, "USB-3 connector pad 39.6x27.6mil"},
 };
 
 /* predefined layer lists */
@@ -324,9 +341,9 @@ static int * readlayerlist[]={
     (int []){-1}, /* empty entry 0 (reserved: manual layer list) */
     (int []){-1}, /* empty entry 1 (reserved: drill file ) */
     (int []){10,11,12,13,15,16,21,22,23,24,25,26,27,28,29,
-     30,31,32,33,34,35,36,37,38,39,-1}, /* component copper (2) */
+     30,31,32,33,35,36,37,38,39,-1}, /* component copper (2) */
     (int []){10,11,12,13,15,16,81,82,83,84,85,86,87,88,89,
-     90,91,92,93,94,95,96,97,98,99,-1}, /* solder copper (3) */
+     90,91,92,93,95,96,97,98,99,-1}, /* solder copper (3) */
     (int []){12,15,16,41,42,43,44,45,46,47,48,49,
      50,51,52,53,54,55,56,57,58,59,-1}, /* innercomp (4) */
     (int []){13,15,16,61,62,63,64,65,66,67,68,69,
@@ -1093,7 +1110,7 @@ void tool_trailer(FILE *f){
   int i2,j;
   /* output drill file */
   /* printf("hit tool trailer prog\n"); */
-  fprintf(f,"TOOL\tCOUNT\tSIZE\n");
+  fprintf(f,"TOOL\tCOUNT\tSIZE (inch)\n");
   for (i2=1;i2<tool_number+1;i2++) {
     if (tool_counts[i2]>0) {
       for (j=0;j<drill_number;j++) if (drilltab[j].tool_index==i2) break;
