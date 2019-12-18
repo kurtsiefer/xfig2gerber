@@ -255,7 +255,7 @@ roundap_table  rnd_apt_tab[] =
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 74
+#define num_rect_apert 78
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -334,6 +334,10 @@ rectap_table rectap_tab[]=
  {124, 54, 191, 0.012, 0.0276, "USB-3 connector pad 12x27.6mil"},
  {124, 178, 192, 0.0396, 0.0276, "USB-3 connector pad 39.6x27.6mil"},
  {178, 124, 193, 0.0276, 0.0396, "USB-3 connector pad 39.6x27.6mil"},
+ {180, 607, 195, 0.135, 0.040, "4x4mm coil pad 135x40mil"},
+ {607, 180, 196, 0.040, 0.135, "4x4mm coil pad 40x135mil"},
+ {180, 270, 197, 0.060, 0.040, "50mil IDC pad 40x60mil"},
+ {270, 180, 198, 0.040, 0.060, "50mil IDC pad 60x40mil"},
 };
 
 /* predefined layer lists */
@@ -614,17 +618,17 @@ int main(int argc, char *argv[]){
     for (i=0;i<outfilenumber;i++) {
 	jobtype=outfilejob[i];
 	/* open one particular output file */
-	strncpy(targetname,outfilemode?outfileroot:sourcename,MAXFILNAMLEN);
+	strncpy(targetname,outfilemode?outfileroot:sourcename,MAXFILNAMLEN-1);
 	targetname[MAXFILNAMLEN-1]=0;
 	if (strncmp(targetname,"-",1)) {
-	    strncat(targetname,suffixlist[jobtype],MAXFILNAMLEN);
+	    strncat(targetname,suffixlist[jobtype],MAXFILNAMLEN-1);
 	    targetname[MAXFILNAMLEN-1]=0;
 	    if (!(target=fopen(targetname,"w"))) return -ermsg(4);
 	} else {
 	    target=stdout;
 	}
 	/* open infile */
-	if strncmp(sourcename,"-",1) {
+	if (strncmp(sourcename,"-",1)) {
 	    if (!(infile=fopen(sourcename,"r"))) return -ermsg(3);
 	} else {
 	    infile=stdin;
@@ -726,6 +730,8 @@ int do_parsing(int *layerlist, int filetype, FILE * target, int punchflag) {
     };
     /* printf("read:%s",inbuffer); */
     if (inbuffer[0]=='\n') {fprintf(target,"\n");continue;};
+    /* ignore comment lines */
+    if (inbuffer[0]=='#') {continue;};
     if ((inbuffer[0]==' ')||(inbuffer[0]=='\t')){  /* continuation line ? */
       if (lastaction!=0) { /* copy if interesting command */
 	i=i;
@@ -933,8 +939,10 @@ int do_parsing(int *layerlist, int filetype, FILE * target, int punchflag) {
 	xmax=xmin;ymax=ymin;
 	for (k=1;k<5;k++) {
 	  getpair(&x,&y);
-	  if (x>xmax) xmax=x;if (x<xmin) xmin=x;
-	  if (y>ymax) ymax=y;if (y<ymin) ymin=y;
+	  if (x>xmax) xmax=x;
+	  if (x<xmin) xmin=x;
+	  if (y>ymax) ymax=y;
+	  if (y<ymin) ymin=y;
 	};
 	x=(xmax+xmin)/2;y=(ymax+ymin)/2;rs_plot(&x,&y);
 	padnum=0;
