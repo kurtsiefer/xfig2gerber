@@ -255,7 +255,7 @@ roundap_table  rnd_apt_tab[] =
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 78
+#define num_rect_apert 80
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -338,6 +338,9 @@ rectap_table rectap_tab[]=
  {607, 180, 196, 0.040, 0.135, "4x4mm coil pad 40x135mil"},
  {180, 270, 197, 0.060, 0.040, "50mil IDC pad 40x60mil"},
  {270, 180, 198, 0.040, 0.060, "50mil IDC pad 60x40mil"},
+ {540, 1800, 199, 0.400, 0.120, "10mm inductor pad 1400x120mil"},
+ {1800, 540, 200, 0.120, 0.400, "10mm inductor pad 1400x120mil"},
+ 
 };
 
 /* predefined layer lists */
@@ -1099,15 +1102,15 @@ void drill_header(FILE *f){
   time_t ti;
   ti=time(NULL);
   fprintf(f,"\n\n");
-  fprintf(f,"/%%********************************************************\n");
-  fprintf(f,"/%%\n/%%\n");
-  fprintf(f,"/%%   Program: xfig2gerber, (c) 1998-2009 Christian Kurtsiefer\n");
-  fprintf(f,"/%%   Date          : %s",ctime(&ti));
-  fprintf(f,"/%%   Source file   : %s \n",ifn);
-  fprintf(f,"/%%   Dest file     : %s \n",ofn);
-  fprintf(f,"/%%   Format        : Drill file \n");
-  fprintf(f,"/%%\n/%%\n");
-  fprintf(f,"/%%********************************************************\n");
+  fprintf(f,";%%********************************************************\n");
+  fprintf(f,";%%\n;%%\n");
+  fprintf(f,";%%   Program: xfig2gerber, (c) 1998-2019 Christian Kurtsiefer\n");
+  fprintf(f,";%%   Date          : %s",ctime(&ti));
+  fprintf(f,";%%   Source file   : %s \n",ifn);
+  fprintf(f,";%%   Dest file     : %s \n",ofn);
+  fprintf(f,";%%   Format        : Drill file \n");
+  fprintf(f,";%%\n;%%\n");
+  fprintf(f,";%%********************************************************\n");
   fprintf(f,"\n\n");
 
   fprintf(f,"/DBGRID 1\n/DBUNIT 8\n"); /* is that necessary ?? */
