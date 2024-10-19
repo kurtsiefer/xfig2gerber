@@ -195,26 +195,30 @@
 /* for consistency with the old program, several graphical diameters can 
    translate in the same tool. Therefore, the supported table has two indices:
    a drill number or virtual diameters, and a tool index (starting at 1) for
-   the physical drill. */
-#define drill_number 15
-#define tool_number 14
-typedef struct {float diameter; int graph_units, tool_index; } drill_table;
+   the physical drill. The route_width is a xfig line width that is used to 
+   identify slots in a drawing for a particular drill type. */
+#define drill_number 16
+#define tool_number 15
+typedef struct {
+    float diameter; int graph_units, route_width, tool_index;
+} drill_table;
 drill_table drilltab[]={
-  {0.028,65,1},                              /* #70, .028" = 0.711mm */
-  {0.035,66,2},     /* standard pin size */  /* #65, .035" = 0.889mm */
-  {0.042,83,3},                              /* consistency? .042" */
-  {0.042,99,3},                              /* #58, .042" = 1.067mm */
-  {0.052,123,4},                             /* #55, .052" = 1.321mm */
-  {0.0595,142,5},                            /* #53, .0595" = 1.511mm */  
-  {0.086,203,6},                             /* #44, .086" = 2.184mm */
-  {0.104,246,7},     /* extra cost */        /* #37, .104" = 2.642mm */
-  {0.125,295,8},    /* for 4-40 screws */    /* 1/8" = 3.175mm */
-  {0.152,359,9},   /* for 6-32 screws */     /* #24, .152" = 3.861mm */
-  {0.0145, 31,10},  /* for tiniest vias */   /* #79, .0145" = 0.368mm */
-  {0.021, 45,11},   /* for small vias */     /* #75, .021" = 0.533mm */
-  {0.177, 392,12},  /* for M4/8-32 screws */ /* #16, 0.177" = 4.496mm */
-  {0.0083, 19, 13},  /* for tinier via */    /* #91, 0.0083" = 0.214mm */
-  {0.011, 25, 14},   /* tiny vias */         /* #85, 0.011" = 0.279mm */
+    {0.028,65,8,1},                              /* #70, .028" = 0.711mm */
+    {0.035,66,11,2},    /* standard pin size */  /* #65, .035" = 0.889mm */
+    {0.042,83,12,3},                             /* consistency? .042" */
+    {0.042,99,13,3},                             /* #58, .042" = 1.067mm */
+    {0.052,123,16,4},                            /* #55, .052" = 1.321mm */
+    {0.0595,142,18,5},                           /* #53, .0595" = 1.511mm */  
+    {0.086,203,26,6},                            /* #44, .086" = 2.184mm */
+    {0.104,246,31,7},    /* extra cost */        /* #37, .104" = 2.642mm */
+    {0.125,295,38,8},    /* for 4-40 screws */   /* 1/8" = 3.175mm */
+    {0.152,359,46,9},    /* for 6-32 screws */   /* #24, .152" = 3.861mm */
+    {0.0145,31,4,10},   /* for tiniest vias */   /* #79, .0145" = 0.368mm */
+    {0.021,45,6,11},    /* for small vias */     /* #75, .021" = 0.533mm */
+    {0.177,392,53,12},  /* for M4/8-32 screws */ /* #16, 0.177" = 4.496mm */
+    {0.0083,19,2,13},   /* for tinier via */     /* #91, 0.0083" = 0.214mm */
+    {0.011,25,3,14},    /* tiny vias */          /* #85, 0.011" = 0.279mm */
+    {0.024,55,7,15},    /* for 0.6mm slots */    /* #73, .024" = 0.610mm */
 };
 
 int tool_counts[tool_number+1];    /* counts number of tool usages */
@@ -255,7 +259,7 @@ roundap_table  rnd_apt_tab[] =
 };
 
 /* same with rectangular apertures. 450 xfig units translate into 100 mil */
-#define num_rect_apert 80
+#define num_rect_apert 95
 typedef struct rectap_table {
     int xfig_x, xfig_y, aperture_idx; double real_x, real_y;
     char* description;} rectap_table;
@@ -334,13 +338,27 @@ rectap_table rectap_tab[]=
  {124, 54, 191, 0.012, 0.0276, "USB-3 connector pad 12x27.6mil"},
  {124, 178, 192, 0.0396, 0.0276, "USB-3 connector pad 39.6x27.6mil"},
  {178, 124, 193, 0.0276, 0.0396, "USB-3 connector pad 39.6x27.6mil"},
- {180, 607, 195, 0.135, 0.040, "4x4mm coil pad 135x40mil"},
+ {180, 607, 195, 0.135, 0.040, "4x4mm coil pad 135x40mil"}, /* 75 */
  {607, 180, 196, 0.040, 0.135, "4x4mm coil pad 40x135mil"},
  {180, 270, 197, 0.060, 0.040, "50mil IDC pad 40x60mil"},
  {270, 180, 198, 0.040, 0.060, "50mil IDC pad 60x40mil"},
- {540, 1800, 199, 0.400, 0.120, "10mm inductor pad 1400x120mil"},
- {1800, 540, 200, 0.120, 0.400, "10mm inductor pad 1400x120mil"},
- 
+ {540, 1800, 199, 0.400, 0.120, "10mm inductor pad 400x120mil"},
+ {1800, 540, 200, 0.120, 0.400, "10mm inductor pad 400x120mil"}, /* 80 */
+ {72, 108, 201, 0.024, 0.016, "ECH8 pad 24x16mil"},
+ {108, 72, 202, 0.016, 0.024, "ECH8 pad 16x24mil"},
+ {72, 342, 203, 0.076, 0.016, "MOLEX ribbon cable pad 76x16mil"},
+ {342, 72, 204, 0.016, 0.076, "MOLEX ribbon cable pad 16x76mil"},
+ {54, 225, 205, 0.050, 0.012, "USB-C pad 50x12mil"}, /* 85 */
+ {225, 54, 206, 0.012, 0.050, "USB-C pad 12x50mil"},
+ {108, 108, 207, 0.024, 0.024, "Vishay PowerPair pad 24x24mil"},
+ {90, 180, 208, 0.040, 0.020, "Minicircuits DL1636 pad 40x20mil"},
+ {180, 90, 209, 0.020, 0.040, "Minicircuits DL1636 pad 20x40mil"},
+ {315, 405, 210, 0.090, 0.070, "DO214 pad 90x70mil"},
+ {405, 315, 211, 0.070, 0.090, "DO214 pad 70x90mil"},
+ {200, 810, 212, 0.180, 0.0444, "XFL5030 coil pad 180x44.4mil"},
+ {810, 200, 213, 0.0444, 0.180, "XFL5030 coil pad 44.4x180mil"},
+ {252, 972, 214, 0.216, 0.056, "XAL6060 coil pad 216x56mil"},
+ {972, 252, 215, 0.056, 0.216, "XAL6060 coil pad 56x216mil"},
 };
 
 /* predefined layer lists */
@@ -452,6 +470,7 @@ void RS274X_trailer_2(FILE *f);
 
 void rs_single(int *x);
 int get_tool_number(int radius);
+int get_route_tool(int width);
 /* produce one file collecting layers in layerlist (a list of ints, 
    terminated with -1) of filetype (1: drill file, 2: gerber file, 
    4: tool file) into the target stream. Has now an index for jobtype
@@ -981,7 +1000,44 @@ int do_parsing(int *layerlist, int filetype, FILE * target, int punchflag) {
 	} else { /* ...or use the found aperture */
 	    fprintf(target,"G54D%03d*G01*X%05dY%05dD02*D03*\n",padnum,x,y);
 	}
-	break; 
+	break;
+
+      case 8: /* generate slot in drill file/tool count */
+	  if (filetype==1 ) { /* drill file */
+	      if (actual_drill!=get_route_tool(ob.width)) {
+		  actual_drill=get_route_tool(ob.width);
+		  fprintf(target,"T%01dC%05.3f\n",
+			  drilltab[actual_drill].tool_index,
+			  drilltab[actual_drill].diameter);
+	      };
+	      varp=NULL;
+	      k=ob.int16; /* point count */
+	      getpair(&x,&y);
+	      rs_drill(&x,&y);
+	      if (k==1) {
+		  //fprintf(target,"G05\nX%05dY%05d\n",x,y);
+		  fprintf(target,"X%05dY%05d\n",x,y);
+	      } else {
+		  fprintf(target,"X%05dY%05d\n",x,y); /* first coordinates */
+		  //fprintf(target,"M15\n"); /* tool down */
+		  while (k>1) {
+		      getpair(&x,&y);
+		      rs_drill(&x,&y);
+		      //this uses canned slot cycles only
+		      fprintf(target,"G85X%05dY%05d\n",x,y); /* linear move */
+		      fprintf(target,"X%05dY%05d\n",x,y); /* last hole */
+		      k--;
+		  };
+		  //fprintf(target,"M16\nG05\n"); /* tool up & back to drill */
+		  //fprintf(target,"G05\n"); 
+	      };
+	      break;
+	  }
+	  /* update tool count - does this make sense for slots?*/
+	  actual_drill=get_route_tool(ob.width);
+	  if (actual_drill>=0 && actual_drill<drill_number) 
+	      tool_counts[drilltab[actual_drill].tool_index]++;
+	  break;
       };
   
     };
@@ -1029,13 +1085,16 @@ void getpair(int *x, int *y){
   sscanf(varp,"%d",x);
   varp=strtok(NULL," \t");sscanf(varp,"%d",y);
 }
-/* rescaling function for plot coordinates; assumes 1cm(xfig)=100 mils */
+/* rescaling function for xfig units to plot coordinates;
+   assumes 1cm(xfig)=100 mils */
+/* plot coordinates are put out in units of 1 mil */
 void rs_plot(int *x, int *y){
   int a,b;
   a=(2 * (*x))/9;b=(2 * (*y))/9;
   *x=b;*y=a;
 }
 /* rescaling function for drill coordinates; assumes 1cm(xfig)=100 mils */
+/* drill coordinates are in multiples of 0.1 mil */
 void rs_drill(int *x, int *y){
   int a,b;
   a=(20 * (*x))/9;b=(20 * (*y))/9;
@@ -1055,10 +1114,20 @@ int get_tool_number(int radius) {
   return i;
 }
 
+/* convert line width into a tool index or return default tool  */
+int get_route_tool(int width) {
+    int i=drill_number;
+    for (i=0;i<drill_number;i++) {
+	if (drilltab[i].route_width==width) break;
+    };
+    if (i==drill_number) i=0;  /* default drill tool */
+    return i;
+}
+
 /* what to do with a specific graphical object? possible results:
    0: skip entry; 1: output drill coordinate; 2: generate line; 
    3: generate polygon; 4: generate circle; 5: filled circle;
-   6: filled square pad; 7: open arc
+   6: filled square pad; 7: open arc; 8: generate slot
    */
 int whattodo(obstruct *ob, int *layerlist, int filetype){
   int val=0;
@@ -1070,6 +1139,12 @@ int whattodo(obstruct *ob, int *layerlist, int filetype){
 	      (ob->fillcolor==7)&&(ob->width==0)){ /* this is a hole... */
 	      val=1;
 	  };
+	  /* this is capturing solid white polylines in layer 0 for slots */
+	  if ((ob->class==2)&&(ob->type==1)&&(ob->type2<1)&&(ob->depth==0)&&
+	      (ob->pencolor==7)){ /* this is a slot... */
+	      val=8;
+	  };
+	  
 	  break;
       case 2: /* gerber file */
 	  /* check correct layer */
@@ -1113,7 +1188,7 @@ void drill_header(FILE *f){
   fprintf(f,";%%********************************************************\n");
   fprintf(f,"\n\n");
 
-  fprintf(f,"/DBGRID 1\n/DBUNIT 8\n"); /* is that necessary ?? */
+  //fprintf(f,"/DBGRID 1\n/DBUNIT 8\n"); /* is that necessary ?? */
   fprintf(f,"M72\n");
 
 }
